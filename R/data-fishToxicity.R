@@ -1,0 +1,28 @@
+#' QSAR Fish Toxicity Dataset for Package
+#'
+#' This dataset, adapted for the package, features 100 observations aimed at assessing the aquatic toxicity towards the fish Pimephales promelas (Fathead Minnow). It comprises six explanatory variables derived from QSAR (Quantitative Structure-Activity Relationship) modeling of chemical compounds, with the response variable being the LC50, which measures the lethal concentration of a compound that causes the death of 50% of a fish population.
+#'
+#' @format A data frame with 100 observations across 7 variables:
+#' \describe{
+#'   \item{LC50}{Numeric: Median lethal concentration (LC50) in mg/L, response variable.}
+#'   \item{CIC0}{Numeric: Molecular descriptor, explanatory variable.}
+#'   \item{SM1_Dz_Z}{Numeric: Molecular descriptor, explanatory variable.}
+#'   \item{GATS1i}{Numeric: Molecular descriptor, explanatory variable.}
+#'   \item{NdsCH}{Numeric: Molecular descriptor, explanatory variable.}
+#'   \item{NdssC}{Numeric: Molecular descriptor, explanatory variable.}
+#'   \item{MLOGP}{Numeric: Octanol/water partition coefficient, explanatory variable.}
+#' }
+#'
+#' @usage
+#' data(fishToxicity)
+#'
+#' @details
+#' The dataset is instrumental for developing predictive models that estimate the toxicity of chemical compounds on aquatic life, utilizing QSAR methodologies. The molecular descriptors (CIC0, SM1_Dz_Z, GATS1i, NdsCH, NdssC) and the octanol/water partition coefficient (MLOGP) serve as the predictors for the LC50 response.
+#'
+#' @references
+#' The dataset is derived from a QSAR study on fish toxicity, and it represents a shortened version (first 100 observations) of the original dataset available from the UCI Machine Learning Repository:
+#'
+#' [QSAR Fish Toxicity Dataset](https://archive.ics.uci.edu/ml/datasets/QSAR+fish+toxicity)
+#'
+#' It is specifically tailored for illustrative and educational purposes within the package.
+"fishToxicity"

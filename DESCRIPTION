@@ -1,0 +1,28 @@
+Package: KIM12
+Title: Data Analysis and Visualization Utilities
+Version: 0.0.0.9000
+Authors@R: 
+    person("TAEHYEONG", "KIM", , "thk6@sfu.ca", role = c("aut", "cre"),
+           comment = c(ORCID = "YOUR-ORCID-ID"))
+Description: This package provides a set of tools and functions designed to facilitate 
+    data analysis and visualization. It streamlines common preprocessing tasks, offers 
+    specialized plotting functions, and integrates various statistical analysis methods 
+    tailored for academic and research purposes. (Expand based on actual functionalities.).
+License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
+        license
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.1
+Depends: R (>= 3.5)
+LazyData: true
+Imports: stats
+Suggests: 
+    knitr,
+    rmarkdown,
+    testthat (>= 3.0.0)
+VignetteBuilder: knitr
+NeedsCompilation: no
+Packaged: 2024-03-28 13:26:37 UTC; 82108
+Author: TAEHYEONGKIM [aut, cre] (YOUR-ORCID-ID)
+Maintainer: TAEHYEONGKIM <thk6@sfu.ca>
+Config/testthat/edition: 3

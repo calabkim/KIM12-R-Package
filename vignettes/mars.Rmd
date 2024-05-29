@@ -1,0 +1,275 @@
+---
+title: "Multivariate Adaptive Regression Splines (MARS) Documentation"
+author: "TAEHYEONG KIM 301302744"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{mars}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE, echo=FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup, echo=FALSE}
+library(KIM12)
+```
+
+<p>
+
+<h2>Brief Explanations:</h2>
+
+<p> 
+1. Testing and Examples: 
+
+Using load_all() will automatically run all test suite examples located in the /R/test.R file. For detailed exploration of mars() functions and methods across different datasets, we recommend directly opening test.R and running the code segments.
+
+<p>
+2. Data Accessibility: 
+
+The KIM12 package includes datasets: concrete, fishToxicity, and yacht. These can be accessed directly after loading the package, with no additional steps required. For detailed information about each dataset, refer to their respective help files.
+
+
+<h2>Getting Started with Multivariate Adaptive Regression Splines (MARS)
+
+<h3> Description </h2>
+<p> Multivariate Adaptive Regression Splines (MARS) is a statistical modeling technique used to capture complex relationships between variables. It constructs models by piecing together polynomial functions, allowing for non-linear relationships between the predictors and the response variable.
+
+<h3> R code
+```{r eval=FALSE}
+print.mars <- function(mars_object) {
+  
+    if (!is.list(mars_object) && !inherits(mars_object, "mars")) {
+      
+        stop("The object is not a valid 'mars' object.")
+      
+    }
+
+    cat("MARS Model Formula:", deparse(mars_object$formula), "\n")
+    
+}
+```
+<h3> Descriptions </h2>
+
+|               |                                                   | 
+| :-------------|:--------------------------------------------------| 
+| formula     | Represents a linear regression model's structure, defining the relationship between a response variable and one or more predictors. This follows the syntax used in lm() function calls in R, where the response variable is placed on the left of a ~ operator, and the predictors are on the right, potentially including interactions and transformations. | 
+| data        | A data frame that contains all the necessary variables for the analysis. This includes the response variable specified in the formula, along with all the predictor variables. Each row represents an observation, and each column represents a variable. |  
+| control | An object created by the mars.control() function, holding parameters that influence the behavior of the Multivariate Adaptive Regression Splines (MARS) model fitting process. Key parameters include Mmax, specifying the maximum number of basis functions; degree (d), controlling the interaction level; and trace, determining the verbosity of model fitting output. For detailed options and defaults, consult the documentation for mars.control(). |  
+
+<h3> Details </h2>
+
+The MARS algorithm is a powerful non-linear modeling technique that consists of two primary phases: the forward selection phase and the backward pruning phase. Each phase plays a crucial role in determining the final model, enabling it to capture complex relationships in the data through a series of steps.
+
+Forward Selection Phase
+
+The forward selection phase builds the model by progressively adding terms to enhance its predictive accuracy. This process involves:
+
+- Sub-region Division: 
+
+The algorithm starts by partitioning the predictor variable space into distinct regions. In each iteration, it attempts to optimally divide these regions into smaller "child" regions or sub-regions, aiming to improve model fit. This is achieved through a structured series of nested loops:
+
+- The first two loops iterate over half the number of predefined sub-regions and the maximum number of basis functions (Mmax), respectively. Each sub-region division adds a pair of basis functions, thus explaining why the iteration count is half the number of sub-regions.
+
+- The third loop examines each predictor variable within the current basis function's scope, searching for the best variable to split.
+
+- The fourth loop determines the optimal split point on the chosen variable. It does this by evaluating the Generalized Cross Validation (GCV) criterion for each possible split, selecting the one that minimizes the criterion, hence optimizing the model fit at each step.
+
+Backward Pruning Phase
+
+Once the model has been built up with basis functions during the forward phase, the backward phase refines it by eliminating terms that contribute minimally to its predictive capability:
+
+-  Model Simplification: This phase iterates through the model components, starting from the most complex model possible (Mmax + 1 terms). It systematically tests the removal of each term to assess its impact on model performance.
+
+An outer loop runs over the model sizes, decrementing from the largest.
+An inner loop identifies and attempts to remove each basis function in turn, evaluating the model's lack of fit (LOF) without that term. The iteration yielding the lowest LOF is considered optimal for that loop.
+
+By comparing the LOF of iterations within the inner loop and across the outer loop, the algorithm identifies the most parsimonious model that still adequately fits the data.
+
+Hinge Functions
+
+Hinge functions are pivotal to the MARS methodology, enabling it to model non-linear relationships by applying linear functions selectively within each sub-region. These functions take the form: $h=max(0,s*(x_{v}-t))$
+
+Where:
+
+|               |                                                   |
+| :-------------|:--------------------------------------------------|
+|$x_{v}$| Represents the value of observation $x$ for a specific variable $v$ This is a fundamental unit of data in the context of the model, referring to the actual measured or observed value.|
+|$t$| Denotes the threshold or splitting point for variable $v$ In the context of the MARS algorithm, $t$ is used to determine the boundaries of the regions or sub-regions within the predictor space.|
+|$s$| A coefficient indicating the direction of the hinge function relative to the splitting point $t$. With values of either 1 or -1, $s$ modifies the hinge function to act as  $max(0,(x_{v}-t))$ or $max(0,(t-x_{v}))$ depending on the value of $s$|
+
+- Generalized Cross Validation (GCV) Criterion
+
+The GCV criterion provides a balance between model fit and complexity, penalizing the addition of too many terms. It's defined as:
+
+$RSS\frac{N}{(N-\tilde{C}(M))^2}$
+
+Where:
+
+|               |                                                   |
+| :-------------|:--------------------------------------------------|
+|$N$ | Total number of observations in the dataset, giving a sense of the data's volume.|
+|$M$ | Represents the count of coefficients in the model minus one, reflecting the model's complexity.|
+|$\tilde{C}(M)$| A corrected complexity measure, calculated as $C(M)+dM$,integrating both the sum of hat-values and a penalty for model complexity. |
+|$C(M)$| Sum of the hat-values from the fitted model, which indicates the leverage each observation has on its own prediction.|
+|$d$| The smoothing parameter that influences the penalty for adding terms to the model. By default, set to 3, this can be adjusted via mars.control to tweak model sensitivity.|
+
+<h3> "MARS" Class Object Structure </h2>
+An object of class "mars" returned by the MARS algorithm encapsulates a wealth of information akin to that found in a linear model (lm) object, augmented with details specific to the MARS approach:
+
+An object of class "mars" is a list containing at least the following information:
+
+|               |                                                   | 
+| :-------------|:--------------------------------------------------| 
+| call | Records the exact syntax of the mars() function call, capturing the arguments and settings used to initiate the model fitting process.|
+| formula | Represents the formula specified in the mars() function, delineating the relationship between the response variable and predictors, guiding the model's structure. |
+| y | Holds the response variable's data as a column vector, representing the target outcome the model aims to predict. |
+| B | A matrix where each column represents a basis function derived during the model's construction. These basis functions are crafted through the forward and backward stepwise selection process, incorporating products of hinge functions. Information on the sign, predictor variable involved, and split point for each is detailed in Bfuncs.|
+| Bfuncs |Details the construction of each basis function in B, outlining the hinge functions applied. Elements may contain no rows (indicating a constant term), a single row, or multiple rows for complex interactions, specifying the characteristics of each hinge function (e.g., direction, split point). |
+|x_names |A character vector listing the names of all predictor variables included in the model, providing a reference for interpreting basis functions and coefficients. |
+|coefficients|Coefficients estimated for each term in the model, quantifying the impact of the corresponding basis functions on the response variable.|
+|residuals|The differences between the observed values of the response variable and the values predicted by the model, indicating the model's accuracy at each data point.|
+|effects|A numeric vector describing the orthogonal (independent) effects calculated from the fitted model, which can be used in further statistical analysis.|
+|rank |Indicates the rank of the fitted model matrix, reflecting the number of linearly independent predictors.|
+|fitted.values|Predicted mean values for the response variable based on the model, illustrating how well the model fits the data across the observed range.|
+|assign|Associates each coefficient (and thus each basis function) with a model term, useful in understanding model structure and the role of each component.|
+|qr|Contains QR decomposition of the model matrix, a mathematical representation used in solving the linear regression model, offering insight into the model's numerical properties.|
+|df.residual|The degrees of freedom for residuals, indicating the number of observations minus the effective number of parameters estimated, useful for statistical testing.|
+|xlevels|Stores the levels for each factor (categorical predictor) used in the model, preserving information essential for correctly interpreting and predicting with factor variables.|
+|call|the match lm function call using basis functions|
+|terms|An object describing the model's terms, extracted from the basis functions and formula, serving as a key component in model specification and interpretation.|
+|model|Represents the data frame used in fitting the model, containing all variables (response and predictors) as specified in the original mars() call, crucial for replication and analysis.|
+
+<h3> Author </h2>
+Contributer: Taehyeong Kim
+
+- Jerome H. Friedman came up with the Multivariate Adaptive Regression Splines (MARS) method in 1991. This method is made to look at relationships between a dependent variable and one or more independent factors that are not simple or linear. The main goal of MARS is to make models that can correctly guess what will happen by changing based on the structure of the data, without needing a set form for the relationship. MARS does this by making piecewise linear regressions that are automatically tuned to the data. This lets it pick up on different patterns and trends. This method works especially well when we don't know the link between variables ahead of time and it might change as we look at different sets of data.
+- MARS models are made in two steps: a forward selection phase adds terms that will make the model better, and a reverse trimming phase gets rid of terms that don't add much to the accuracy of the model. This makes a model that is easy to understand and can be changed easily. It gives useful information about how factors in multiple datasets are related. A lot of different fields use this method to find complex connections and nonlinear links. 
+
+<h3> References </h2>
+
+Friedman, J. H. (1991). Multivariate Adaptive Regression Splines . *The Annals of Statistics, 19*(1), 1–67. Retrieved march 14, 2024, from https://www.jstor.org/stable/2241837. 
+
+STAT 360 & STAT361 course materials: 
+https://github.com/grace84/SFUStat360Projects
+
+
+<h3> Additional Resources </h2>
+
+- summary.mars
+Offers an in-depth summary of the Multivariate Adaptive Regression Splines (MARS) model. It provides detailed insights into the model's structure, including the selected basis functions, variable importance, and model fit statistics. Use this function to gain a comprehensive understanding of how the model was constructed and its performance metrics.
+
+- anova.mars
+Generates an Analysis of Variance (ANOVA) table for the MARS model, comparing the variance explained by the model against the residual variance. This is useful for assessing the overall significance of the model's predictors and understanding the contribution of each term to the model's predictive power.
+
+- Generic functions for class mars:
+
+coef():
+Retrieves the coefficients of the MARS model, indicating the weight of each basis function within the model.
+effects():
+Provides the estimated effects of the predictors on the response variable, helpful in understanding the influence of each predictor.
+residuals():
+Computes the residuals from the MARS model, which are the differences between the observed and fitted values. This is crucial for diagnosing model fit.
+fitted():
+Returns the fitted values calculated by the model, offering insights into the model's predictions on the training data.
+vcov():
+Gives the variance-covariance matrix for the model's coefficients, useful for understanding the precision of the coefficient estimates.
+
+- Prediction-related functions
+
+predict.mars (accessible via predict()):
+Allows for making predictions on new data using the fitted MARS model. It can also provide confidence and prediction intervals, which are valuable for understanding the range within which future observations are expected to fall with a certain level of confidence.
+confint():
+Specifically designed for calculating confidence intervals of the model parameters, offering a statistical range that likely contains the true value of the coefficients.
+
+- Visualization and representation
+
+print.mars:
+Customizes the printing of MARS model summaries to be more interpretable, highlighting key components like the basis functions and model coefficients.
+plot.mars:
+Tailored for plotting MARS models, this function can visualize various aspects of the model, such as the relationship between predictors and the response variable through the fitted basis functions. It enhances the interpretability of the model's non-linear relationships.
+
+<h3> Exercises
+
+```{r echo=FALSE}
+mc <- mars.control(Mmax = 10)
+
+concretemars <-mars(ConcreteCompressiveStrength~.,data=concrete,control = mc)
+
+toxicmars <-mars(LC50~.,data=fishToxicity, control = mc)
+
+yachtmars <-mars(RRPUWOD~.,data=yacht, control = mc)
+```
+
+<h2> MARS Object Methods</h2>
+
+
+<h4> summary.mars()</h2>
+
+<p>The summary function offers a comprehensive overview of a fitted model, detailing its characteristics and parameters. For invoking this function with a MARS model, simply use summary.mars(your_mars_object) or the more general summary(your_mars_object). The latter approach leverages method dispatch to automatically select the appropriate method for an object of class 'mars'. This function computes and displays key model details, including residuals, coefficients, and the construct of each basis function. Specifically, it reveals the direction (sign), the variables at each split, and the corresponding split points. To illustrate its utility, here are three examples where summary.mars() is applied to MARS models derived from different datasets: concrete, toxic, and yacht. Each example showcases how the function elucidates the unique aspects and components of the models tailored to these distinct datasets.
+
+```{r}
+summary(concretemars)
+
+summary(toxicmars)
+
+summary(yachtmars)
+```
+
+<h4>print.mars()</h2>
+
+<p>The print.mars() function is designed to display essential details about a model created with the Multivariate Adaptive Regression Splines (MARS) method. When you want to invoke this function, you can do so by passing your MARS model object directly to print.mars(your_mars_object). Alternatively, leveraging the print(your_mars_object) syntax is equally effective thanks to method dispatching in R, which automatically selects the print.mars method for objects of the 'mars' class. This function outputs the model's coefficients and delineates the structure of its basis functions, including their respective components. For illustrative purposes, three examples are provided where print.mars() is executed on MARS models derived from the concrete, toxic, and yacht datasets. Each instance demonstrates the function's capability to succinctly summarize key aspects of the models tailored to these specific datasets, offering insights into their structure and the influence of various predictors.
+
+```{r}
+print(concretemars)
+
+print(toxicmars)
+
+print(yachtmars)
+```
+
+
+<h4>predict.mars()</h2>
+
+<p>To make a prediction of a new response based on the predictor columns in the given data frame, the predict.mars() method needs the coefficients of the fitted model and a new data frame with both response and predictor values. The new data frame is sent to the basis function matrix, and matrix multiplication is used to get the expected response vector. If no new data is given, the default is to use the basis function of the mars object, which gives the same expected answer as the fitted values of the mars object. It is necessary to pass a mars object to predict.mars() in order to call the code. To use the straight call to guess(), see below. Method dispatch will then find the right method for the "mars" object. It will give you a vector of expected values with the same observations as the data frame you gave it. The following 3 cases show what I mean. It is called on the three mars items that were made from the three datasets: concrete, toxic, and yacht
+
+
+```{r}
+predict(concretemars)
+
+predict(toxicmars)
+
+predict(yachtmars)
+```
+
+
+<h4>anova.mars()</h2>
+
+<p>The function anova.mars() tells you useful things about the base functions. You can call this method by giving anova.mars() a mars object as an input. To use the straight method call anova(), see below. The method dispatch will find the right method for the object of class "mars." It will figure out the residuals, F-value, P-value, model sum of squares, mean sum of squares, degree of freedom, and return a table with those numbers (along with the residuals). The following 3 cases show what I mean. Anova.mars() is called on the three mars objects that were made from the three datasets, which are concrete, poisonous, and yacht
+
+```{r}
+anova(concretemars)
+
+anova(toxicmars)
+
+anova(yachtmars)
+```
+
+<p>
+
+<h4>plot.mars()</h2>
+
+<p>The fitting model is shown graphically by the plot.mars() method. Just give a mars object as an input to plot.mars() to call this method. To use the straight call to plot(), see below. Method dispatch will find the right method for the object of class "mars." It will give us three plots: a scatter plot of residuals vs. fitted values, a histogram of residuals, and a Q-Q plot of residuals. The following 3 cases show what I mean. plot.mars() is called on the three mars objects that were made from the three datasets, which are concrete, poisonous, and yacht
+
+```{r, fig.width=8, fig.height=4}
+plot(concretemars)
+
+plot(toxicmars)
+
+plot(yachtmars)
+```

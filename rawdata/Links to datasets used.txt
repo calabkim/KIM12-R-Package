@@ -1,0 +1,37 @@
+<<<<<Datasets Utilized in Analysis>>>>>
+
+1. Yacht Hydrodynamics Dataset
+
+Description:
+
+This dataset explores the hydrodynamic performance of sailing yachts based on various ship design parameters.
+
+Access:
+
+https://archive.ics.uci.edu/ml/datasets/Yacht+Hydrodynamics
+
+2. QSAR Fish Toxicity Dataset
+
+Description:
+
+Quantitative structure activity relationship (QSAR) model predicting fish toxicity based on chemical descriptors.
+
+Access:
+
+https://archive.ics.uci.edu/ml/datasets/QSAR+fish+toxicity
+
+3. Concrete Compressive Strength Dataset
+
+Description:
+
+This dataset helps in assessing the compressive strength of concrete blends, considering different ingredients.
+
+Access:
+
+https://archive.ics.uci.edu/ml/datasets/Concrete+Compressive+Strength
+
+
+
+
+
+
